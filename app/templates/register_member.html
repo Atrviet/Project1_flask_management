@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Đăng kí thành viên mới{% endblock %}
+
+{% block content %}
+<h2>Đăng kí thành viên mới</h2>
+<form method="POST">
+    {{ form.hidden_tag() }}
+
+    <div>
+        {{ form.username.label }}<br>
+        {{ form.username(class="form-control") }}
+    </div>
+
+    <div>
+        {{ form.fullname.label }}<br>
+        {{ form.fullname(class="form-control") }}
+    </div>
+
+    <div>
+        {{ form.email.label }}<br>
+        {{ form.email(class="form-control") }}
+    </div>
+    
+    <div>
+        {{ form.password.label }}<br>
+        {{ form.password(class="form-control") }}
+    </div>
+    
+    <div>
+        {{ form.submit(class="btn btn-primary") }}
+    </div>
+</form>
+{% endblock %}
