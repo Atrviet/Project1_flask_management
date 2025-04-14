@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from app.models import Admin, Member  # Thêm import Member
 from app.forms import LoginForm, RegisterMemberForm  # Thêm import RegisterMemberForm
+from .forms import LoginForm
 
 auth_bp = Blueprint('auth', __name__)
 admin_bp = Blueprint('admin', __name__)
@@ -13,18 +14,20 @@ def index():
 # Route cho trang đăng nhập
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('admin.dashboard'))
+    form = LoginForm()  # Tạo đối tượng form từ LoginForm
+    if form.validate_on_submit():  # Kiểm tra khi người dùng submit
+        username = form.username.data
+        password = form.password.data
+        user = Admin.query.filter_by(username=username).first()
 
-    form = LoginForm()
-    if form.validate_on_submit():
-        admin = Admin.query.filter_by(username=form.username.data).first()
-        if admin and admin.check_password(form.password.data):
-            login_user(admin)
-            next_page = request.args.get('next')
-            return redirect(next_page or url_for('admin.dashboard'))
-        flash('Tên đăng nhập hoặc mật khẩu không đúng.', 'danger')
-    return render_template('login.html', form=form)
+        if user and user.check_password(password):
+            login_user(user)
+            flash('Đăng nhập thành công!', 'success')
+            return redirect(url_for('admin.dashboard'))
+        else:
+            flash('Đăng nhập thất bại. Vui lòng kiểm tra lại tên đăng nhập hoặc mật khẩu.', 'danger')
+
+    return render_template('login.html', form=form)  # Truyền form vào template
 
 # Route cho trang đăng xuất
 @auth_bp.route('/logout')
@@ -34,12 +37,22 @@ def logout():
     flash('Bạn đã đăng xuất.', 'info')
     return redirect(url_for('auth.login'))
 
-# Route cho trang dashboard của admin
-# Chỉ admin mới có quyền truy cập
-@admin_bp.route('/dashboard')
+@admin_bp.route('/dashboard', methods=['GET'])
 @login_required
 def dashboard():
-    return render_template('admin_dashboard.html')
+    # Kiểm tra quyền admin bằng cách kiểm tra 'role'
+    if current_user.role != 'admin':
+        flash('Bạn không có quyền truy cập vào trang này.', 'danger')
+        return redirect(url_for('auth.login'))  # Chuyển hướng về trang đăng nhập
+
+    # Lấy thông số trang từ query string (mặc định là trang 1)
+    page = request.args.get('page', 1, type=int)
+    
+    # Lấy danh sách thành viên phân trang, 10 thành viên mỗi trang
+    members = Member.query.paginate(page, per_page=10, error_out=False)
+
+    # Truyền đối tượng phân trang vào template
+    return render_template('admin_dashboard.html', members=members.items, pagination=members)
 
 # Route đăng kí tài khoản thành viên mới
 @admin_bp.route('/register_member', methods=['GET', 'POST'])

@@ -17,4 +17,5 @@ with app.app_context():
         print("Đã tạo admin mặc định!")
 
 if __name__ == '__main__':
+    print("Running...")
     app.run(debug=True)
