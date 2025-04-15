@@ -4,7 +4,20 @@
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
 
+<!-- Hiển thị flash message trong container đã định dạng CSS -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div id="flash-message-container">
+      {% for category, message in messages %}
+        <div class="flash-message flash-{{ category }}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
 
+<!-- Form đăng nhập -->
 <div class="container mt-5">
   <div class="row justify-content-center">
     <div class="col-md-6">

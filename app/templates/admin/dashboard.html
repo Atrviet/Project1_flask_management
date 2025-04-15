@@ -1,0 +1,85 @@
+<!-- templates/admin/dashboard.html -->
+{% extends 'base.html' %}
+{% block content %}
+<h1>Quản trị thành viên</h1>
+
+<div class="grid grid-cols-2 gap-4">
+  <!-- Form tạo / chỉnh sửa -->
+  <div class="p-4 border rounded">
+    <h2>{{ 'Chỉnh sửa thành viên' if edit_id else 'Tạo thành viên mới' }}</h2>
+    <form method="POST">
+      {{ form.hidden_tag() }}
+      {{ form.id }}
+      <div>
+        {{ form.username.label }}<br>
+        {% if edit_id %}
+          <input type="text" class="border p-1 bg-gray-100" value="{{ form.username.data }}" disabled>
+        {% else %}
+          {{ form.username(class="border p-1 w-full") }}
+        {% endif %}
+      </div>
+      <div>
+        {{ form.fullname.label }}<br>
+        {{ form.fullname(class="border p-1 w-full") }}
+      </div>
+      <div>
+        {{ form.email.label }}<br>
+        {{ form.email(class="border p-1 w-full") }}
+      </div>
+      <div>
+        {{ form.password.label }}<br>
+        {{ form.password(class="border p-1 w-full") }}
+      </div>
+      <div>
+        {{ form.confirm_password.label }}<br>
+        {{ form.confirm_password(class="border p-1 w-full") }}
+      </div>
+      <div class="mt-2">
+        {{ form.submit(class="px-4 py-2 rounded shadow") }}
+        {% if edit_id %}
+          <a href="{{ url_for('admin.dashboard') }}" class="ml-2 underline">Hủy</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Danh sách thành viên -->
+  <div class="p-4 border rounded">
+    <h2>Danh sách thành viên</h2>
+    <table class="min-w-full">
+      <thead>
+        <tr>
+          <th>Username</th><th>Họ tên</th><th>Email</th><th>Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for m in members %}
+        <tr>
+          <td>{{ m.username }}</td>
+          <td>{{ m.fullname }}</td>
+          <td>{{ m.email }}</td>
+          <td>
+            <a href="{{ url_for('admin.dashboard', edit_id=m.id) }}" class="underline">Sửa</a>
+            <form method="POST" action="{{ url_for('admin.delete_member', user_id=m.id) }}" style="display:inline;">
+                {{ form.hidden_tag() }}
+              <button type="submit" onclick="return confirm('Xóa thành viên này?');" class="underline text-red-600">Xóa</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- phân trang -->
+    <div class="mt-4">
+      {% if pagination.has_prev %}
+        <a href="{{ url_for('admin.dashboard', page=pagination.prev_num) }}">« Prev</a>
+      {% endif %}
+      <span>Trang {{ pagination.page }} / {{ pagination.pages }}</span>
+      {% if pagination.has_next %}
+        <a href="{{ url_for('admin.dashboard', page=pagination.next_num) }}">Next »</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
