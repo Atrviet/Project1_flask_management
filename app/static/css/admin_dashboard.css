@@ -1,167 +1,391 @@
-/* admin_dashboard.css */
+/* admin.css */
 
-.admin-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+/* Flash message giống login */
+#flash-message-container {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: 100%;
+  max-width: 90%;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+
+.flash-message {
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  color: white;
+  margin-top: 10px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  animation: fadein 0.5s ease, fadeout 0.5s ease 4s forwards;
+}
+
+.flash-success { background-color: #38a169; }
+.flash-danger  { background-color: #e53e3e; }
+.flash-warning { background-color: #dd6b20; }
+.flash-info    { background-color: #3182ce; }
+
+@keyframes fadein {
+  from { opacity: 0; top: -20px; }
+  to   { opacity: 1; top: 20px; }
+}
+
+@keyframes fadeout {
+  from { opacity: 1; }
+  to   { opacity: 0; top: -20px; }
+}
+
+/* Layout tổng thể */
+body {
+  background-color: #f5f5f5;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  margin: 0;
+  padding: 20px;
+}
+
+/* Container */
+.dashboard-container {
+  max-width: 1200px;
+  margin: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+}
+
+/* Form */
+.dashboard-form {
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  flex: 1 1 350px;
+  min-width: 300px;
+}
+
+.dashboard-form h3 {
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #2c3e50;
+}
+
+/* Table */
+.member-table {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  flex: 1 1 600px;
+  overflow-x: auto;
+}
+
+.member-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.member-table th,
+.member-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.member-table th {
+  background-color: #3498db;
+  color: white;
+}
+
+.member-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Buttons */
+.btn {
+  padding: 8px 14px;
+  border-radius: 5px;
+  text-decoration: none;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-block;
+  transition: background-color 0.3s ease;
+  border: none;
+}
+
+.btn-edit {
+  background-color: #f0ad4e;
+}
+
+.btn-edit:hover {
+  background-color: #ec971f;
+}
+
+.btn-delete {
+  background-color: #e74c3c;
+}
+
+.btn-delete:hover {
+  background-color: #c0392b;
+}
+
+.btn-submit {
+  width: 100%;
+  background-color: #3498db;
+}
+
+.btn-submit:hover {
+  background-color: #2980b9;
+}
+
+/* Form elements */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: #3498db;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+/* Error text */
+.text-danger small {
+  color: #e74c3c;
+  font-size: 0.875rem;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 10px;
+}
+
+.pagination a {
+  padding: 6px 12px;
+  background: #3498db;
+  color: white;
+  border-radius: 5px;
+  text-decoration: none;
+}
+
+.pagination a:hover {
+  background: #2980b9;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboard-container {
+    flex-direction: column;
   }
-  
-  .admin-actions {
-    margin-bottom: 30px;
+}
+
+/* ==== Task Panel ==== */
+.task-panel {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  margin-top: 2rem;
+  flex: 1 1 100%;
+}
+
+/* Tiêu đề panel */
+.task-panel h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 0.5rem;
+}
+
+/* Form giao nhiệm vụ */
+.task-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.task-form .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.task-form .form-group label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #34495e;
+}
+
+.task-form .form-group input[type="text"],
+.task-form .form-group input[type="date"],
+.task-form .form-group textarea,
+.task-form .form-group input[type="file"] {
+  padding: 0.75rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.task-form .form-group input:focus,
+.task-form .form-group textarea:focus,
+.task-form .form-group input[type="file"]:focus {
+  border-color: #3498db;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+/* Nút gửi task */
+.task-form .btn-submit-task {
+  grid-column: 1 / -1;
+  padding: 0.75rem 1.5rem;
+  background-color: #38a169;
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  align-self: start;
+  transition: background-color 0.3s ease;
+}
+
+.task-form .btn-submit-task:hover {
+  background-color: #2f855a;
+}
+
+/* Danh sách nhiệm vụ */
+.task-list {
+  margin-top: 2rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.task-item {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 1rem 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.task-item:nth-child(odd) {
+  background-color: #fbfcfd;
+}
+
+/* Thông tin mỗi task */
+.task-item .info {
+  flex: 1 1 60%;
+}
+
+.task-item .info .title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.25rem;
+}
+
+.task-item .info .description {
+  font-size: 0.95rem;
+  color: #4a5568;
+  margin-bottom: 0.5rem;
+}
+
+.task-item .info .deadline {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #e53e3e;
+}
+
+/* File đính kèm */
+.task-item .file-link {
+  flex: 1 1 20%;
+  text-align: right;
+}
+
+.task-item .file-link a {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  background-color: #3182ce;
+  color: white;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.task-item .file-link a:hover {
+  background-color: #2b6cb0;
+}
+
+/* Button hành động (Chỉnh sửa, Xóa) */
+.task-item .actions {
+  flex: 1 1 20%;
+  text-align: right;
+}
+
+.task-item .actions .btn-edit,
+.task-item .actions .btn-delete {
+  margin-left: 0.5rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 5px;
+  font-size: 0.85rem;
+}
+
+.task-item .actions .btn-edit {
+  background-color: #f6ad55;
+  color: white;
+}
+
+.task-item .actions .btn-edit:hover {
+  background-color: #dd8500;
+}
+
+.task-item .actions .btn-delete {
+  background-color: #e53e3e;
+  color: white;
+}
+
+.task-item .actions .btn-delete:hover {
+  background-color: #c53030;
+}
+
+/* Responsive cho màn hình nhỏ */
+@media (max-width: 768px) {
+  .task-form {
+    grid-template-columns: 1fr;
   }
-  
-  .members-table-container {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    margin-top: 20px;
+  .task-item {
+    flex-direction: column;
   }
-  
-  .members-table-container h3 {
-    color: #2c3e50;
-    margin-bottom: 20px;
-    font-size: 1.5rem;
-  }
-  
-  .table-controls {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    align-items: center;
-  }
-  
-  .search-box {
-    display: flex;
-    align-items: center;
-  }
-  
-  .search-box input {
-    padding: 8px 15px;
-    border: 1px solid #ddd;
-    border-radius: 4px 0 0 4px;
-    width: 300px;
-  }
-  
-  .search-btn {
-    padding: 8px 15px;
-    background: #3498db;
-    color: white;
-    border: none;
-    border-radius: 0 4px 4px 0;
-    cursor: pointer;
-  }
-  
-  .btn-export {
-    background: #27ae60;
-    color: white;
-    padding: 8px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .members-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .members-table th, 
-  .members-table td {
-    padding: 12px 15px;
+  .task-item .file-link,
+  .task-item .actions {
     text-align: left;
-    border-bottom: 1px solid #eee;
+    margin-top: 0.5rem;
   }
-  
-  .members-table th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-    color: #2c3e50;
-  }
-  
-  .members-table tr:hover {
-    background-color: #f5f5f5;
-  }
-  
-  .status-badge {
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 500;
-  }
-  
-  .status-active {
-    background-color: #d4edda;
-    color: #155724;
-  }
-  
-  .status-inactive {
-    background-color: #f8d7da;
-    color: #721c24;
-  }
-  
-  .btn-action {
-    display: inline-block;
-    padding: 5px 10px;
-    margin: 0 5px;
-    border-radius: 4px;
-    color: white;
-    text-decoration: none;
-  }
-  
-  .btn-edit {
-    background-color: #3498db;
-  }
-  
-  .btn-delete {
-    background-color: #e74c3c;
-  }
-  
-  .pagination {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-  }
-  
-  .page-link {
-    padding: 8px 15px;
-    margin: 0 5px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    text-decoration: none;
-    color: #3498db;
-  }
-  
-  .page-link.active {
-    background-color: #3498db;
-    color: white;
-    border-color: #3498db;
-  }
-  
-  .page-link.disabled {
-    color: #6c757d;
-    pointer-events: none;
-  }
-  
-  /* Responsive */
-  @media (max-width: 768px) {
-    .table-controls {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    
-    .search-box {
-      width: 100%;
-      margin-bottom: 10px;
-    }
-    
-    .search-box input {
-      width: 100%;
-    }
-    
-    .members-table th, 
-    .members-table td {
-      padding: 8px;
-      font-size: 0.9rem;
-    }
-  }
+}

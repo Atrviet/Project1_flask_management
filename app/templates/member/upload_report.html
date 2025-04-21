@@ -1,0 +1,14 @@
+{% extends 'base_member.html' %}
+{% block title %}Tải báo cáo{% endblock %}
+{% block content %}
+<h2>Tải báo cáo</h2>
+<form method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.report.label(class_='form-label') }}
+        {{ form.report(class_='form-control-file') }}
+    </div>
+    <button type="submit" class="btn btn-primary">Tải lên</button>
+    <a href="{{ url_for('member.dashboard') }}" class="btn btn-secondary">Quay lại</a>
+</form>
+{% endblock %}

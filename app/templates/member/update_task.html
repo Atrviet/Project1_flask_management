@@ -1,0 +1,18 @@
+{% extends 'base_member.html' %}
+{% block title %}Cập nhật công việc{% endblock %}
+{% block content %}
+<h2>Cập nhật task: {{ task.title }}</h2>
+<form method="post">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.status.label(class_='form-label') }}
+        {{ form.status(class_='form-control') }}
+    </div>
+    <div class="form-group">
+        {{ form.progress.label(class_='form-label') }}
+        {{ form.progress(class_='form-control', min=0, max=100) }}
+    </div>
+    <button type="submit" class="btn btn-success">Lưu</button>
+    <a href="{{ url_for('member.dashboard') }}" class="btn btn-secondary">Huỷ</a>
+</form>
+{% endblock %}

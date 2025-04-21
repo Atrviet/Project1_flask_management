@@ -1,85 +1,175 @@
-<!-- templates/admin/dashboard.html -->
 {% extends 'base.html' %}
 {% block content %}
-<h1>Quản trị thành viên</h1>
+<h1 class="text-2xl font-bold mb-4">Quản trị thành viên</h1>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
 
-<div class="grid grid-cols-2 gap-4">
-  <!-- Form tạo / chỉnh sửa -->
-  <div class="p-4 border rounded">
-    <h2>{{ 'Chỉnh sửa thành viên' if edit_id else 'Tạo thành viên mới' }}</h2>
+<div class="grid grid-cols-2 gap-6">
+  <!-- Form tạo / chỉnh sửa thành viên -->
+  <div class="p-6 bg-white rounded-lg shadow">
+    <h2 class="text-xl font-semibold mb-4">{{ 'Chỉnh sửa thành viên' if edit_id else 'Tạo thành viên mới' }}</h2>
     <form method="POST">
       {{ form.hidden_tag() }}
       {{ form.id }}
-      <div>
-        {{ form.username.label }}<br>
+      <div class="mb-3">
+        {{ form.username.label(class="block font-medium mb-1") }}
         {% if edit_id %}
-          <input type="text" class="border p-1 bg-gray-100" value="{{ form.username.data }}" disabled>
+          <input type="text" value="{{ form.username.data }}" disabled class="border p-2 w-full bg-gray-100 rounded">
         {% else %}
-          {{ form.username(class="border p-1 w-full") }}
+          {{ form.username(class="border p-2 w-full rounded") }}
         {% endif %}
       </div>
-      <div>
-        {{ form.fullname.label }}<br>
-        {{ form.fullname(class="border p-1 w-full") }}
+      <div class="mb-3">
+        {{ form.fullname.label(class="block font-medium mb-1") }}
+        {{ form.fullname(class="border p-2 w-full rounded") }}
       </div>
-      <div>
-        {{ form.email.label }}<br>
-        {{ form.email(class="border p-1 w-full") }}
+      <div class="mb-3">
+        {{ form.email.label(class="block font-medium mb-1") }}
+        {{ form.email(class="border p-2 w-full rounded") }}
       </div>
-      <div>
-        {{ form.password.label }}<br>
-        {{ form.password(class="border p-1 w-full") }}
+      <div class="mb-3">
+        {{ form.password.label(class="block font-medium mb-1") }}
+        {{ form.password(class="border p-2 w-full rounded") }}
       </div>
-      <div>
-        {{ form.confirm_password.label }}<br>
-        {{ form.confirm_password(class="border p-1 w-full") }}
+      <div class="mb-3">
+        {{ form.confirm_password.label(class="block font-medium mb-1") }}
+        {{ form.confirm_password(class="border p-2 w-full rounded") }}
       </div>
-      <div class="mt-2">
-        {{ form.submit(class="px-4 py-2 rounded shadow") }}
+      <div class="flex items-center space-x-4">
+        {{ form.submit(class="px-4 py-2 bg-green-600 text-white rounded shadow") }}
         {% if edit_id %}
-          <a href="{{ url_for('admin.dashboard') }}" class="ml-2 underline">Hủy</a>
+          <a href="{{ url_for('admin.dashboard') }}" class="text-gray-600 underline">Hủy</a>
         {% endif %}
       </div>
     </form>
   </div>
 
   <!-- Danh sách thành viên -->
-  <div class="p-4 border rounded">
-    <h2>Danh sách thành viên</h2>
-    <table class="min-w-full">
-      <thead>
+  <div class="p-6 bg-white rounded-lg shadow">
+    <h2 class="text-xl font-semibold mb-4">Danh sách thành viên</h2>
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
         <tr>
-          <th>Username</th><th>Họ tên</th><th>Email</th><th>Hành động</th>
+          <th class="px-4 py-2 text-left text-sm font-medium">Username</th>
+          <th class="px-4 py-2 text-left text-sm font-medium">Họ tên</th>
+          <th class="px-4 py-2 text-left text-sm font-medium">Email</th>
+          <th class="px-4 py-2 text-left text-sm font-medium">Hành động</th>
         </tr>
       </thead>
-      <tbody>
-      {% for m in members %}
+      <tbody class="bg-white divide-y divide-gray-200">
+        {% for m in members %}
         <tr>
-          <td>{{ m.username }}</td>
-          <td>{{ m.fullname }}</td>
-          <td>{{ m.email }}</td>
-          <td>
-            <a href="{{ url_for('admin.dashboard', edit_id=m.id) }}" class="underline">Sửa</a>
-            <form method="POST" action="{{ url_for('admin.delete_member', user_id=m.id) }}" style="display:inline;">
-                {{ form.hidden_tag() }}
-              <button type="submit" onclick="return confirm('Xóa thành viên này?');" class="underline text-red-600">Xóa</button>
+          <td class="px-4 py-2">{{ m.username }}</td>
+          <td class="px-4 py-2">{{ m.fullname }}</td>
+          <td class="px-4 py-2">{{ m.email }}</td>
+          <td class="px-4 py-2 space-x-2">
+            <a href="{{ url_for('admin.dashboard', edit_id=m.id) }}" class="text-blue-600 underline">Sửa</a>
+            <form method="POST" action="{{ url_for('admin.delete_member', user_id=m.id) }}" class="inline">
+              {{ form.hidden_tag() }}
+              <button type="submit" onclick="return confirm('Xóa thành viên này?');" class="text-red-600 underline">Xóa</button>
             </form>
+            <a href="{{ url_for('admin.dashboard', assign_id=m.id) }}" class="text-indigo-600 underline">Giao nhiệm vụ</a>
           </td>
         </tr>
-      {% endfor %}
+        {% endfor %}
       </tbody>
     </table>
 
-    <!-- phân trang -->
-    <div class="mt-4">
+    <!-- Phân trang -->
+    <div class="mt-4 flex justify-between items-center">
       {% if pagination.has_prev %}
-        <a href="{{ url_for('admin.dashboard', page=pagination.prev_num) }}">« Prev</a>
+        <a href="{{ url_for('admin.dashboard', page=pagination.prev_num) }}" class="underline">« Prev</a>
+      {% else %}
+        <span class="text-gray-400">« Prev</span>
       {% endif %}
       <span>Trang {{ pagination.page }} / {{ pagination.pages }}</span>
       {% if pagination.has_next %}
-        <a href="{{ url_for('admin.dashboard', page=pagination.next_num) }}">Next »</a>
+        <a href="{{ url_for('admin.dashboard', page=pagination.next_num) }}" class="underline">Next »</a>
+      {% else %}
+        <span class="text-gray-400">Next »</span>
       {% endif %}
     </div>
   </div>
+</div>
+
+<!-- Panel giao nhiệm vụ -->
+<div class="mt-6 p-6 bg-white rounded-lg shadow">
+  {% if assign_id and assign_member %}
+    <h2 class="text-xl font-semibold mb-4">Giao nhiệm vụ cho {{ assign_member.username }}</h2>
+    <form id="assignForm" method="POST" enctype="multipart/form-data" action="{{ url_for('admin.dashboard', assign_id=assign_member.id) }}">
+      {{ assign_form.hidden_tag() }}
+      <div class="mb-3">
+        {{ assign_form.title.label(class="block font-medium mb-1") }}
+        {{ assign_form.title(class="border p-2 w-full rounded") }}
+      </div>
+      <div class="mb-3">
+        {{ assign_form.description.label(class="block font-medium mb-1") }}
+        {{ assign_form.description(class="border p-2 w-full rounded") }}
+      </div>
+      <div class="mb-3">
+        {{ assign_form.file.label(class="block font-medium mb-1") }}
+        {{ assign_form.file(class="w-full") }}
+      </div>
+      <!-- Progress bar container -->
+      <div id="progressContainer" class="mb-3" style="display: none;">
+        <label for="progressBar" class="block font-medium mb-1">Tiến trình tải lên:</label>
+        <progress id="progressBar" value="0" max="100" class="w-full rounded"></progress>
+        <span id="percentDisplay" class="inline-block mt-1">0%</span>
+      </div>
+      <div class="mb-3">
+        {{ assign_form.deadline.label(class="block font-medium mb-1") }}
+        {{ assign_form.deadline(class="border p-2 w-full rounded") }}
+      </div>
+      <div>
+        <button type="submit" name="assign_submit" id="assignButton" class="px-4 py-2 bg-blue-600 text-white rounded shadow">Giao nhiệm vụ</button>
+      </div>
+    </form>
+  {% else %}
+    <h2 class="text-xl font-semibold mb-2">Chọn thành viên để giao nhiệm vụ</h2>
+    <p>Nhấn "Giao nhiệm vụ" bên mục Thành viên để mở form.</p>
+  {% endif %}
+</div>
+
+{% if assign_id and assign_member %}
+<script>
+  document.getElementById('assignForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var form = this;
+    var formData = new FormData(form);
+    var xhr = new XMLHttpRequest();
+
+    xhr.open(form.method, form.action, true);
+    
+    // Hiển thị container progress
+    var progressContainer = document.getElementById('progressContainer');
+    var progressBar = document.getElementById('progressBar');
+    var percentDisplay = document.getElementById('percentDisplay');
+    progressContainer.style.display = 'block';
+
+    xhr.upload.onprogress = function(event) {
+      if (event.lengthComputable) {
+        var percent = Math.round((event.loaded / event.total) * 100);
+        progressBar.value = percent;
+        percentDisplay.textContent = percent + '%';
+      }
+    };
+
+    xhr.onload = function() {
+      if (xhr.status === 200 || xhr.status === 302) {
+        window.location.reload();
+      } else {
+        alert('Có lỗi xảy ra khi tải lên.');
+        progressContainer.style.display = 'none';
+      }
+    };
+
+    xhr.onerror = function() {
+      alert('Lỗi kết nối. Vui lòng thử lại.');
+      progressContainer.style.display = 'none';
+    };
+
+    xhr.send(formData);
+  });
+</script>
+  {% endif %}
 </div>
 {% endblock %}

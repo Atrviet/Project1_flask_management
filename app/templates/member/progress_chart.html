@@ -1,0 +1,22 @@
+{% extends 'base_member.html' %}
+
+{% block title %}Biểu đồ tiến độ{% endblock %}
+
+{% block content %}
+<h2>Biểu đồ tiến độ</h2>
+<canvas id="chartProgress" width="400" height="200"></canvas>
+{% endblock %}
+
+{% block scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const labels = {{ labels|tojson }};
+    const data = {{ data|tojson }};
+    const ctx = document.getElementById('chartProgress').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: { labels: labels, datasets: [{ label: 'Tiến độ (%)', data: data, backgroundColor: 'rgba(54, 162, 235, 0.6)' }] },
+      options: { scales: { y: { beginAtZero: true, max: 100 } } }
+    });
+  </script>
+{% endblock %}

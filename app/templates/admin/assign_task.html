@@ -1,0 +1,38 @@
+<!-- templates/admin/assign_task.html -->
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Giao nhiệm vụ cho thành viên</h1>
+
+<div class="max-w-xl mx-auto p-6 border border-gray-300 rounded shadow-sm bg-white">
+  <form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+    <div class="mb-4">
+      {{ form.title.label(class="block text-sm font-medium text-gray-700") }}
+      {{ form.title(class="mt-1 block w-full border border-gray-300 rounded p-2") }}
+    </div>
+
+    <div class="mb-4">
+      {{ form.description.label(class="block text-sm font-medium text-gray-700") }}
+      {{ form.description(class="mt-1 block w-full border border-gray-300 rounded p-2") }}
+    </div>
+
+    <div class="mb-4">
+      {{ form.file.label(class="block text-sm font-medium text-gray-700") }}
+      {{ form.file(class="mt-1 block w-full") }}
+    </div>
+
+    <div class="mb-4">
+      {{ form.deadline.label(class="block text-sm font-medium text-gray-700") }}
+      {{ form.deadline(class="mt-1 block w-full border border-gray-300 rounded p-2") }}
+    </div>
+
+    <div class="flex justify-between items-center">
+      <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow">
+        Giao nhiệm vụ
+      </button>
+      <a href="{{ url_for('admin.dashboard') }}" class="text-gray-600 hover:underline">← Quay lại Dashboard</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
