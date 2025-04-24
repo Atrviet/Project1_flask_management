@@ -1,18 +1,71 @@
 {% extends 'base_member.html' %}
 {% block title %}Cập nhật công việc{% endblock %}
+
 {% block content %}
-<h2>Cập nhật task: {{ task.title }}</h2>
-<form method="post">
-    {{ form.hidden_tag() }}
+  <h2>Cập nhật task: {{ task.title }}</h2>
+
+  <form method="post">
+    {{ task_form.hidden_tag() }}
+    {{ progress_form.hidden_tag() }}
+
     <div class="form-group">
-        {{ form.status.label(class_='form-label') }}
-        {{ form.status(class_='form-control') }}
+      {{ task_form.status.label(class_='form-label') }}
+      {{ task_form.status(class_='form-control') }}
     </div>
     <div class="form-group">
-        {{ form.progress.label(class_='form-label') }}
-        {{ form.progress(class_='form-control', min=0, max=100) }}
+      {{ task_form.progress.label(class_='form-label') }}
+      {{ task_form.progress(class_='form-control', min=0, max=100) }}
     </div>
-    <button type="submit" class="btn btn-success">Lưu</button>
+
+    <hr>
+
+    <!-- Phần nhập tiến độ hằng ngày -->
+    <h3>Tiến độ hôm nay</h3>
+    <div class="form-group">
+      {{ progress_form.description.label(class_='form-label') }}
+      {{ progress_form.description(class_='form-control', rows=4) }}
+    </div>
+
+    <button type="submit" name="submit_all" class="btn btn-primary">Lưu tiến độ</button>
     <a href="{{ url_for('member.dashboard') }}" class="btn btn-secondary">Huỷ</a>
-</form>
+  </form>
+
+  <!-- Danh sách tiến độ -->
+  <ul class="mt-3 list-group">
+    {% for e in entries %}
+      <li class="list-group-item">
+        <strong>{{ e.date.strftime('%d-%m-%Y') }}</strong>: {{ e.description }}
+      </li>
+    {% else %}
+      <li class="list-group-item text-muted">Chưa có tiến độ nào cho hôm nay.</li>
+    {% endfor %}
+  </ul>
+
+  {% if is_admin %}
+    <hr>
+    <!-- Phần gửi phản hồi của admin -->
+    <h3>Phản hồi cho thành viên</h3>
+    <form method="post">
+      {{ feedback_form.hidden_tag() }}
+      <div class="form-group">
+        {{ feedback_form.content.label(class_='form-label') }}
+        {{ feedback_form.content(class_='form-control', rows=4) }}
+      </div>
+      <button type="submit" class="btn btn-warning mt-2">{{ feedback_form.submit.label.text }}</button>
+    </form>
+  {% endif %}
+
+  {% if feedbacks %}
+    <hr>
+    <h4>Phản hồi từ admin</h4>
+    <ul class="list-group">
+      {% for f in feedbacks %}
+        <li class="list-group-item">
+          <strong>{{ f.admin.username }}</strong> ({{ f.date.strftime('%d-%m-%Y %H:%M') }}):<br>
+          {{ f.content }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
 {% endblock %}

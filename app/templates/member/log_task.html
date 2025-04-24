@@ -1,0 +1,16 @@
+{% extends 'base_member.html' %}
+{% block content %}
+<h2>Báo cáo công việc: {{ task.title }}</h2>
+<form method="post">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.description.label }}
+        {{ form.description(class_='form-control') }}
+    </div>
+    <div class="form-group">
+        {{ form.progress.label }}
+        {{ form.progress(class_='form-control', min=0, max=100) }}
+    </div>
+    <button type="submit" class="btn btn-primary">Gửi báo cáo</button>
+</form>
+{% endblock %}

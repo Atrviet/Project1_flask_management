@@ -1,7 +1,6 @@
 from flask import Flask
 from config import Config
-from app.extensions import db, login_manager, mail
-from app.extensions import init_scheduler
+from app.extensions import db, login_manager, mail, init_scheduler, socketio
 from flask_migrate import Migrate
 from flask_wtf import CSRFProtect
 
@@ -22,6 +21,9 @@ def create_app():
     # Cấu hình Flask-Login
     login_manager.login_view = 'auth.login'
     login_manager.login_message_category = 'warning'
+    
+    # Gắn SocketIO
+    socketio.init_app(app, cors_allowed_origins="*")
 
     Migrate(app, db)
 
@@ -33,6 +35,7 @@ def create_app():
     app.register_blueprint(auth_bp)                 # => /, /login, /logout
     app.register_blueprint(admin_bp, url_prefix='/admin')  # => /admin/dashboard, ...
     app.register_blueprint(member_bp, url_prefix='/member')
+    
     # Gắn Flask-Mail và scheduler
     mail.init_app(app)
     init_scheduler(app)

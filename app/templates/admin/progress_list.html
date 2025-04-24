@@ -1,0 +1,22 @@
+{% extends 'base_admin.html' %}
+{% block title %}Tất cả tiến độ{% endblock %}
+
+{% block content %}
+  <h1 class="text-2xl font-bold mb-4">Danh sách tiến độ</h1>
+
+  {% if entries %}
+    <ul class="space-y-4">
+      {% for p in entries %}
+        <li class="p-4 bg-white rounded-lg shadow">
+          <div class="text-sm text-gray-600 mb-1">
+            {{ p.date.strftime('%d-%m-%Y %H:%M') }}
+            {% if p.user %}— {{ p.user.username }}{% endif %}
+          </div>
+          <p>{{ p.description }}</p>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-gray-500">Chưa có bản ghi tiến độ nào.</p>
+  {% endif %}
+{% endblock %}

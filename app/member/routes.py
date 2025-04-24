@@ -1,11 +1,18 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, json, send_from_directory, abort
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, json, send_from_directory, abort, current_app
 from flask_login import login_required, current_user
 from flask_mail import Message
 from datetime import datetime, timedelta
 
-from app.models import Task, Member, db
-from app.forms import UpdateTaskForm, UploadReportForm
+from app.models import Task, Member, db, TaskLog
+from app.forms import UpdateTaskForm, UploadReportForm, TaskLogForm
 from app.extensions import mail, scheduler, socketio
+from flask_wtf.csrf import generate_csrf
+
+# Cập nhật task
+from datetime import date
+from app.models import Task, Progress
+from app.forms import UpdateTaskForm, TaskProgressForm
+
 
 member_bp = Blueprint('member', __name__, url_prefix='/member')
 
@@ -22,21 +29,21 @@ def download_file(filename):
     return send_from_directory(
         directory=upload_folder,
         path=filename,
-        as_attachment=True  # <--- header để trình duyệt download
+        as_attachment=True  # header để trình duyệt download
     )
 
+# Trang dashboard cho member
 @member_bp.route('/dashboard')
 @login_required
 def dashboard():
-    # Chỉ members mới được truy cập
     if current_user.role != 'member':
         flash("Bạn không có quyền truy cập!", 'danger')
         return redirect(url_for('auth.login'))
 
     tasks = Task.query.filter_by(assignee_id=current_user.id).all()
-    return render_template('member/dashboard.html', tasks=tasks)
+    return render_template('member/dashboard.html', tasks=tasks, csrf_token=generate_csrf())
 
-# Tạo task mới
+# Cập nhật task
 @member_bp.route('/task/<int:task_id>/update', methods=['GET', 'POST'])
 @login_required
 def update_task(task_id):
@@ -45,24 +52,44 @@ def update_task(task_id):
         flash("Bạn không có quyền chỉnh sửa task này.", 'danger')
         return redirect(url_for('member.dashboard'))
 
-    form = UpdateTaskForm(obj=task)
-    if form.validate_on_submit():
-        task.status = form.status.data
-        task.progress = form.progress.data
+    task_form = UpdateTaskForm(obj=task)
+    progress_form = TaskProgressForm()
+
+    if request.method == 'POST' and task_form.validate() and progress_form.validate():
+        # Cập nhật trạng thái & % hoàn thành
+        task.status = task_form.status.data
+        task.progress = task_form.progress.data
         db.session.commit()
-        # Phát sự kiện realtime
+
+        # Lưu tiến độ mới
+        new_prog = Progress(
+            task_id=task.id,
+            user_id=current_user.id,
+            description=progress_form.description.data
+        )
+        db.session.add(new_prog)
+        db.session.commit()
+
+        # Phát sự kiện realtime qua SocketIO
         socketio.emit('task_updated', {
             'task_id': task.id,
             'status': task.status,
             'progress': task.progress
         }, room=f'user_{current_user.id}')
 
-        flash("Cập nhật task thành công!", 'success')
-        return redirect(url_for('member.dashboard'))
-
-    return render_template('member/update_task.html', form=form, task=task)
-
-# 
+        flash("Đã lưu trạng thái và tiến độ hôm nay!", 'success')
+        return redirect(url_for('member.update_task', task_id=task.id))
+    
+    entries = Progress.query.filter_by(task_id=task.id, user_id=current_user.id).order_by(Progress.date.desc()).all()
+    return render_template(
+        'member/update_task.html',
+        task=task,
+        task_form=task_form,
+        progress_form=progress_form,
+        entries=entries
+    )
+    
+# Xoá task
 @member_bp.route('/task/<int:task_id>/delete', methods=['POST'])
 @login_required
 def delete_task(task_id):
@@ -75,6 +102,7 @@ def delete_task(task_id):
     db.session.commit()
     flash("Xoá task thành công!", 'success')
     return redirect(url_for('member.dashboard'))
+
 
 # Tải lên báo cáo
 @member_bp.route('/upload_report', methods=['GET', 'POST'])
@@ -100,6 +128,7 @@ def progress_chart():
     data = [t.progress for t in tasks]
     return render_template('member/progress_chart.html', labels=labels, data=data)
 
+# API trả về tiến độ tổng
 @member_bp.route('/api/progress')
 @login_required
 def api_progress():
@@ -126,6 +155,7 @@ def send_deadline_reminders():
             )
             # Gửi email nhắc nhở
             mail.send(msg)
+
 
 # Sự kiện realtime qua Socket.IO
 @socketio.on('join')

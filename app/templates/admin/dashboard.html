@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+
 {% block content %}
 <h1 class="text-2xl font-bold mb-4">Quản trị thành viên</h1>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
@@ -62,12 +63,23 @@
           <td class="px-4 py-2">{{ m.fullname }}</td>
           <td class="px-4 py-2">{{ m.email }}</td>
           <td class="px-4 py-2 space-x-2">
-            <a href="{{ url_for('admin.dashboard', edit_id=m.id) }}" class="text-blue-600 underline">Sửa</a>
-            <form method="POST" action="{{ url_for('admin.delete_member', user_id=m.id) }}" class="inline">
+            <a href="{{ url_for('admin.dashboard', edit_id=m.id) }}"
+               class="text-blue-600 underline">Sửa</a>
+      
+            <form method="POST"
+                  action="{{ url_for('admin.delete_member', user_id=m.id) }}"
+                  class="inline">
               {{ form.hidden_tag() }}
-              <button type="submit" onclick="return confirm('Xóa thành viên này?');" class="text-red-600 underline">Xóa</button>
+              <button type="submit"
+                      onclick="return confirm('Xóa thành viên này?');"
+                      class="text-red-600 underline">Xóa</button>
             </form>
-            <a href="{{ url_for('admin.dashboard', assign_id=m.id) }}" class="text-indigo-600 underline">Giao nhiệm vụ</a>
+      
+            <!-- Giao nhiệm vụ -->
+            <a href="{{ url_for('admin.assign_task', user_id=m.id) }}"
+               class="px-3 py-1 bg-blue-600 text-white rounded">
+              Giao nhiệm vụ
+            </a>
           </td>
         </tr>
         {% endfor %}
@@ -91,85 +103,164 @@
   </div>
 </div>
 
-<!-- Panel giao nhiệm vụ -->
-<div class="mt-6 p-6 bg-white rounded-lg shadow">
-  {% if assign_id and assign_member %}
-    <h2 class="text-xl font-semibold mb-4">Giao nhiệm vụ cho {{ assign_member.username }}</h2>
-    <form id="assignForm" method="POST" enctype="multipart/form-data" action="{{ url_for('admin.dashboard', assign_id=assign_member.id) }}">
-      {{ assign_form.hidden_tag() }}
-      <div class="mb-3">
-        {{ assign_form.title.label(class="block font-medium mb-1") }}
-        {{ assign_form.title(class="border p-2 w-full rounded") }}
+<div class="container mx-auto py-6">
+  <!-- Panel giao nhiệm vụ -->
+  <div class="mt-6 p-6 bg-white rounded-lg shadow">
+    {% if assign_id and assign_member %}
+      <h2 class="text-xl font-semibold mb-4">Giao nhiệm vụ cho {{ assign_member.username }}</h2>
+      <form id="assignForm" method="POST" 
+        enctype="multipart/form-data" 
+        action="{{ url_for('admin.assign_task', user_id=assign_member.id) }}">
+        {{ assign_form.hidden_tag() }}
+        <!--From giao nhiệm vụ-->
+        <div class="mb-3">
+          {{ assign_form.title.label(class="block font-medium mb-1") }}
+          {{ assign_form.title(class="border p-2 w-full rounded") }}
+        </div>
+        <div class="mb-3">
+          {{ assign_form.description.label(class="block font-medium mb-1") }}
+          {{ assign_form.description(class="border p-2 w-full rounded") }}
+        </div>
+        <div class="mb-3">
+          {{ assign_form.file.label(class="block font-medium mb-1") }}
+          {{ assign_form.file(class="w-full") }}
+        </div>
+
+        <!-- Progress bar container -->
+        <div id="progressContainer" class="mb-3" style="display: none;">
+          <label for="progressBar" class="block font-medium mb-1">Tiến trình tải lên:</label>
+          <progress id="progressBar" value="0" max="100" class="w-full rounded"></progress>
+          <span id="percentDisplay" class="inline-block mt-1">0%</span>
+        </div>
+
+        <div class="mb-3">
+          {{ assign_form.deadline.label(class="block font-medium mb-1") }}
+          {{ assign_form.deadline(class="border p-2 w-full rounded") }}
+        </div>
+        <div>
+          <button type="submit" name="assign_submit" id="assignButton" class="px-4 py-2 bg-blue-600 text-white rounded shadow">Giao nhiệm vụ</button>
+        </div>
+      </form>
+    {% else %}
+      <h2 class="text-xl font-semibold mb-2">Chọn thành viên để giao nhiệm vụ</h2>
+      <p>Nhấn "Giao nhiệm vụ" bên mục Thành viên để mở form.</p>
+    {% endif %}
+  </div>
+</div>
+<!-- Panel hiển thị Tất cả tiến độ -->
+<div class="progress-panel">
+  <h2 class="progress-title">Tất cả tiến độ</h2>
+
+  {% if progress_entries_all %}
+    <div class="progress-grid">
+      {% for p in progress_entries_all %}
+      <div class="progress-card">
+        <div class="progress-card-header">
+          <div>
+            <div class="progress-task-name">📝 {{ p.task.title }}</div>
+            <div class="progress-task-date">{{ p.date.strftime('%d-%m-%Y %H:%M') }}</div>
+          </div>
+          {% if p.user %}
+          <div class="progress-user">👤 {{ p.user.username }}</div>
+          {% endif %}
+        </div>
+        <div class="progress-description">{{ p.description }}</div>
+        
+        <!-- Nút Xóa tiến độ -->
+        <form action="{{ url_for('admin.delete_progress', progress_id=p.id) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa tiến độ này?');">
+          <!-- CSRF Token -->
+          {{ form.hidden_tag() }}
+          <button type="submit" class="btn-delete">Xóa</button>
+        </form>
       </div>
-      <div class="mb-3">
-        {{ assign_form.description.label(class="block font-medium mb-1") }}
-        {{ assign_form.description(class="border p-2 w-full rounded") }}
-      </div>
-      <div class="mb-3">
-        {{ assign_form.file.label(class="block font-medium mb-1") }}
-        {{ assign_form.file(class="w-full") }}
-      </div>
-      <!-- Progress bar container -->
-      <div id="progressContainer" class="mb-3" style="display: none;">
-        <label for="progressBar" class="block font-medium mb-1">Tiến trình tải lên:</label>
-        <progress id="progressBar" value="0" max="100" class="w-full rounded"></progress>
-        <span id="percentDisplay" class="inline-block mt-1">0%</span>
-      </div>
-      <div class="mb-3">
-        {{ assign_form.deadline.label(class="block font-medium mb-1") }}
-        {{ assign_form.deadline(class="border p-2 w-full rounded") }}
-      </div>
-      <div>
-        <button type="submit" name="assign_submit" id="assignButton" class="px-4 py-2 bg-blue-600 text-white rounded shadow">Giao nhiệm vụ</button>
-      </div>
-    </form>
+      {% endfor %}
+    </div>
   {% else %}
-    <h2 class="text-xl font-semibold mb-2">Chọn thành viên để giao nhiệm vụ</h2>
-    <p>Nhấn "Giao nhiệm vụ" bên mục Thành viên để mở form.</p>
+    <p class="text-gray-500">Chưa có bản ghi tiến độ nào.</p>
   {% endif %}
 </div>
 
+
+<!--Panel feedback-->
 {% if assign_id and assign_member %}
-<script>
-  document.getElementById('assignForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    var form = this;
-    var formData = new FormData(form);
-    var xhr = new XMLHttpRequest();
+  <div class="mt-6 p-6 bg-white rounded-lg shadow">
+    <h2 class="text-xl font-semibold mb-4">Phản hồi tiến độ: {{ assign_member.username }}</h2>
 
-    xhr.open(form.method, form.action, true);
-    
-    // Hiển thị container progress
-    var progressContainer = document.getElementById('progressContainer');
-    var progressBar = document.getElementById('progressBar');
-    var percentDisplay = document.getElementById('percentDisplay');
-    progressContainer.style.display = 'block';
+    {# Danh sách tiến độ của member #}
+    <ul class="list-group mb-4">
+      {% for p in progress_entries %}
+      <li class="list-group-item mb-3">
+        <div>
+          <strong>Ngày {{ p.date.strftime('%d-%m-%Y') }}</strong>:<br>
+          {{ p.description }}
+        </div>
 
-    xhr.upload.onprogress = function(event) {
-      if (event.lengthComputable) {
-        var percent = Math.round((event.loaded / event.total) * 100);
-        progressBar.value = percent;
-        percentDisplay.textContent = percent + '%';
-      }
-    };
+        {# Show existing feedbacks #}
+        {% for f in p.feedbacks %}
+        <div class="mt-2 p-2 bg-gray-100 rounded">
+          <small><strong>{{ f.admin.username }}</strong> ({{ f.date.strftime('%H:%M %d-%m-%Y') }}):</small><br>
+          {{ f.content }}
+        </div>
+        {% endfor %}
 
-    xhr.onload = function() {
-      if (xhr.status === 200 || xhr.status === 302) {
-        window.location.reload();
-      } else {
-        alert('Có lỗi xảy ra khi tải lên.');
-        progressContainer.style.display = 'none';
-      }
-    };
-
-    xhr.onerror = function() {
-      alert('Lỗi kết nối. Vui lòng thử lại.');
-      progressContainer.style.display = 'none';
-    };
-
-    xhr.send(formData);
-  });
-</script>
+        {# Form gửi feedback cho bản ghi này #}
+        <form method="post" action="{{ url_for('admin.task_feedbacks', task_id=task.id) }}" class="mt-3">
+          {{ feedback_form.hidden_tag() }}
+          <input type="hidden" name="progress_id" value="{{ p.id }}">
+          <div class="form-group">
+            {{ feedback_form.content(class="border p-2 w-full rounded", rows=2) }}
+          </div>
+          <button type="submit" class="px-3 py-1 bg-yellow-500 text-white rounded mt-1">{{ feedback_form.submit.label.text }}</button>
+        </form>
+      </li>
+      {% else %}
+      <li class="list-group-item text-muted">Chưa có tiến độ nào để phản hồi.</li>
+      {% endfor %}
+    </ul>
+  </div>
   {% endif %}
-</div>
+{% endblock %}
+
+{% block scripts %}
+  {% if assign_id and assign_member %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.0/socket.io.min.js"></script>
+    <script>
+      document.getElementById('assignForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var form = this;
+        var formData = new FormData(form);
+        var xhr = new XMLHttpRequest();
+
+        xhr.open(form.method, form.action, true);
+
+        var progressContainer = document.getElementById('progressContainer');
+        var progressBar = document.getElementById('progressBar');
+        var percentDisplay = document.getElementById('percentDisplay');
+        progressContainer.style.display = 'block';
+
+        xhr.upload.onprogress = function(event) {
+          if (event.lengthComputable) {
+            var percent = Math.round((event.loaded / event.total) * 100);
+            progressBar.value = percent;
+            percentDisplay.textContent = percent + '%';
+          }
+        };
+
+        xhr.onload = function() {
+          if (xhr.status === 200 || xhr.status === 302) {
+            window.location.href = "/admin/dashboard";
+          } else {
+            alert('Có lỗi xảy ra khi tải lên.');
+            progressContainer.style.display = 'none';
+          }
+        };
+        xhr.onerror = function() {
+          alert('Lỗi kết nối. Vui lòng thử lại.');
+          progressContainer.style.display = 'none';
+        };
+
+        xhr.send(formData);
+      });
+    </script>
+  {% endif %}
 {% endblock %}

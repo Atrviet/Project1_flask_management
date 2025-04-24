@@ -1,0 +1,32 @@
+{% extends 'base_admin.html' %}
+{% block title %}Phản hồi tiến độ{% endblock %}
+
+{% block content %}
+  <h2>Phản hồi cho Task: {{ task.title }}</h2>
+  <ul class="list-group">
+    {% for p in progress_entries %}
+      <li class="list-group-item mb-3">
+        <strong>{{ p.user.username }}</strong> ({{ p.date.strftime('%d-%m-%Y') }}):<br>
+        {{ p.description }}
+
+        <!-- Hiển thị feedback đã có -->
+        {% for f in p.feedbacks %}
+          <div class="border rounded p-2 mt-2 bg-light">
+            <small><strong>{{ f.admin.username }}</strong> ({{ f.date.strftime('%H:%M %d-%m-%Y') }}):</small><br>
+            {{ f.content }}
+          </div>
+        {% endfor %}
+
+        <!-- Form gửi thêm feedback cho mục này -->
+        <form method="post" class="mt-2">
+          {{ form.hidden_tag() }}
+          <input type="hidden" name="progress_id" value="{{ p.id }}">
+          <div class="form-group">
+            {{ form.content(label_class='form-label', class_='form-control', rows=2) }}
+          </div>
+          <button type="submit" class="btn btn-warning btn-sm">{{ form.submit.label.text }}</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}

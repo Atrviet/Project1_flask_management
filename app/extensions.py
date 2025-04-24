@@ -1,3 +1,4 @@
+# app/extensions.py
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_mail import Mail
@@ -9,7 +10,7 @@ from flask_apscheduler import APScheduler
 db = SQLAlchemy()
 login_manager = LoginManager()
 mail = Mail()
-socketio = SocketIO()
+socketio = SocketIO(cors_allowed_origins="*")
 scheduler = APScheduler()
 
 # Đăng ký user_loader
@@ -39,7 +40,7 @@ def init_scheduler(app):
     scheduler.init_app(app)
     scheduler.start()
 
-# app/__init__.py
+# app/__init__.py  
 from flask import Flask
 from flask_migrate import Migrate
 from flask_wtf import CSRFProtect
@@ -50,11 +51,14 @@ csrf = CSRFProtect()
 
 def create_app():
     app = Flask(__name__)
+    print("App created:", app)
     app.config.from_object(Config)
+    print("Config loaded:", app.config)
     app.config['SECRET_KEY'] = app.config.get('SECRET_KEY', 'change-this')
 
     # CSRF
     csrf.init_app(app)
+    init_extensions(app) # Gắn tất cả các extension ở trên với app
 
     # Gắn các extension cơ bản (DB, Login, Mail, SocketIO, Scheduler)
     init_extensions(app)
