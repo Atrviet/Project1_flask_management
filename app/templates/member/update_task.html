@@ -67,5 +67,26 @@
       {% endfor %}
     </ul>
   {% endif %}
+{% endblock %}
 
+{% block scripts %}
+  {{ super() }}
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  <script>
+    const socket = io();
+    const currentTaskId = Number("{{ task.id }}");
+
+    socket.on("connect", () => {
+      console.log("✅ Socket đã kết nối (member):", socket.id);
+      socket.emit("join");
+    });
+
+    socket.on("task_updated", data => {
+      console.log("🔄 Task updated:", data);
+      if (data.task_id === currentTaskId) {
+        alert(`Task đã được cập nhật:\nTrạng thái: ${data.status}\nTiến độ: ${data.progress}%`);
+        location.reload();
+      }
+    });
+  </script>
 {% endblock %}

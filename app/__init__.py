@@ -3,6 +3,7 @@ from config import Config
 from app.extensions import db, login_manager, mail, init_scheduler, socketio
 from flask_migrate import Migrate
 from flask_wtf import CSRFProtect
+from flask_socketio import send, emit
 
 csrf = CSRFProtect()
 
@@ -41,3 +42,8 @@ def create_app():
     init_scheduler(app)
 
     return app
+
+@socketio.on('connect')
+def test_connect():
+    print("🔥 Client đã kết nối socket thành công")
+    emit('connected', {'msg': 'Bạn đã kết nối socket!'})

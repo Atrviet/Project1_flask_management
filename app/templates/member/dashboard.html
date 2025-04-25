@@ -42,4 +42,14 @@
         {% endfor %}
     </tbody>
 </table>
+<script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+  const socket = io();  // mặc định kết nối cùng origin
+  socket.on('connect', () => {
+    socket.emit('join'); // join vào room user_<id>
+  });
+  socket.on('new_task', data => {
+    alert(`Bạn có task mới: ${data.title}, deadline: ${data.due_date}`);
+  });
+</script>
 {% endblock %}

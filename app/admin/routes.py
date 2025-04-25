@@ -15,6 +15,9 @@ from flask_mail import Message
 from app.__init__ import db, mail
 from app.models import Task, User
 
+# SocketIO
+from flask_socketio import join_room, emit
+
 # Cho phép các định dạng file
 ALLOWED_EXTENSIONS = {'pdf', 'docx', 'png', 'jpg', 'zip'}
 
@@ -218,6 +221,7 @@ def assign_task(user_id):
         
     # Phần xử lý khi người dùng gửi form    
     if form.validate_on_submit():
+        print("Form valid. Proceeding with task creation", flush=True)
         filename = None
         f = form.file.data
         if f and allowed_file(f.filename):
@@ -234,6 +238,16 @@ def assign_task(user_id):
         
         db.session.add(new_task)
         db.session.commit()
+        
+        # Emit realtime cho member
+        socketio.emit('new_task', {
+            'task_id': new_task.id,
+            'title': new_task.title,
+            'description': new_task.description,
+            'due_date': new_task.due_date.strftime('%Y-%m-%d'),
+            #'downloadUrl': url_for('member.download_file', task_id=new_task.id)
+        }, room=f'user_{user_id}')
+        current_app.logger.info(f"Emitted new_task to user_{user_id}")
         
         # Gửi email thông báo
         user = User.query.get(user_id)
@@ -285,3 +299,11 @@ def delete_progress(progress_id):
         flash(f'Có lỗi xảy ra khi xóa tiến độ: {str(e)}', 'danger')
 
     return redirect(url_for('admin.dashboard'))
+
+# khi admin connect
+@socketio.on('connect')
+def handle_connect():
+    if current_user.role == 'admin':
+        join_room('admins')
+    else:
+        join_room(f'user_{current_user.id}')

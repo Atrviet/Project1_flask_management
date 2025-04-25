@@ -1,0 +1,15 @@
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+  const socket = io();
+
+  socket.on("connect", () => {
+    console.log("✅ Socket đã kết nối (member):", socket.id);
+    socket.emit("join"); // server sẽ join_room(user_<id>)
+  });
+
+  socket.on("task_updated", data => {
+    console.log("Task updated:", data);
+    //reload trang để cập nhật status mới
+    location.reload();
+  });
+</script>

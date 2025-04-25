@@ -222,45 +222,31 @@
 {% endblock %}
 
 {% block scripts %}
-  {% if assign_id and assign_member %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.0/socket.io.min.js"></script>
-    <script>
-      document.getElementById('assignForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        var form = this;
-        var formData = new FormData(form);
-        var xhr = new XMLHttpRequest();
+  {{ super() }}
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  <script>
+    const socket = io();
 
-        xhr.open(form.method, form.action, true);
+    socket.on('connect', () => {
+      console.log('✅ Admin socket connected:', socket.id);
+      socket.emit('join');   // server sẽ join_room('admins') nếu role=admin
+    });
 
-        var progressContainer = document.getElementById('progressContainer');
-        var progressBar = document.getElementById('progressBar');
-        var percentDisplay = document.getElementById('percentDisplay');
-        progressContainer.style.display = 'block';
+    // task mới được admin giao
+    socket.on('new_task', data => {
+      console.log('📥 New task assigned:', data);
+    });
 
-        xhr.upload.onprogress = function(event) {
-          if (event.lengthComputable) {
-            var percent = Math.round((event.loaded / event.total) * 100);
-            progressBar.value = percent;
-            percentDisplay.textContent = percent + '%';
-          }
-        };
+    // task được member cập nhật progress
+    socket.on('task_updated', data => {
+      console.log('Member updated task:', data);
 
-        xhr.onload = function() {
-          if (xhr.status === 200 || xhr.status === 302) {
-            window.location.href = "/admin/dashboard";
-          } else {
-            alert('Có lỗi xảy ra khi tải lên.');
-            progressContainer.style.display = 'none';
-          }
-        };
-        xhr.onerror = function() {
-          alert('Lỗi kết nối. Vui lòng thử lại.');
-          progressContainer.style.display = 'none';
-        };
-
-        xhr.send(formData);
-      });
-    </script>
-  {% endif %}
+      const row = document.querySelector(`#task-row-${data.task_id}`);
+      if (row) {
+        row.querySelector('.status-cell').textContent = data.status;
+        row.querySelector('.progress-cell').textContent = data.progress + '%';
+      }
+    });
+  </script>
 {% endblock %}
+

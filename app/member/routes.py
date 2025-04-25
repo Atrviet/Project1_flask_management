@@ -13,6 +13,10 @@ from datetime import date
 from app.models import Task, Progress
 from app.forms import UpdateTaskForm, TaskProgressForm
 
+# Realtime
+from flask_socketio import join_room, emit
+from flask_socketio import leave_room
+
 
 member_bp = Blueprint('member', __name__, url_prefix='/member')
 
@@ -159,11 +163,13 @@ def send_deadline_reminders():
 
 # Sự kiện realtime qua Socket.IO
 @socketio.on('join')
-def on_join(data):
+def on_join(data=None):
     room = f"user_{current_user.id}"
-    socketio.join_room(room)
+    join_room(room)            # gọi join_room từ flask_socketio
+    print(f"[SOCKET] {current_user.username} joined {room} via join()")
+    emit('joined', {'room': room})
 
 @socketio.on('leave')
 def on_leave(data):
     room = f"user_{current_user.id}"
-    socketio.leave_room(room)
+    leave_room(room)
